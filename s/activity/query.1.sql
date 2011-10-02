@@ -17,10 +17,11 @@ SELECT
         ),
         10
     ) as query_t,
+    procpid as pid,
     case when waiting then 'LOCK'::text else '    '::text end as lock,
     coalesce( client_addr::TEXT, '[local]') || ':' || client_port as client,
     array_to_string(
-        ARRAY( SELECT (regexp_matches( current_query, '(.{1,80})', 'g'))[1] ),
+        ARRAY( SELECT (regexp_matches( current_query, '(.{1,' || least( 255, :COLUMNS - 67 )::TEXT || '})', 'g'))[1] ),
         E' --\n'
     ) as query
 FROM
